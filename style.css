@@ -1,6 +1,7 @@
 /* ==========================================================================
-   Round Robin CPU Scheduling Visualizer
+   Operating Systems Algorithm Visualizer
    Minimal, Neat, Academic OS Practical Assignment Stylesheet
+   Supports CPU Scheduling (Round Robin, FCFS) & Disk Scheduling (SSTF, FCFS)
    ========================================================================== */
 
 /* Base Reset & Variables */
@@ -27,6 +28,8 @@
   --btn-primary-hover: #1d4ed8;
   --btn-secondary: #4b5563;
   --btn-secondary-hover: #374151;
+  --btn-accent: #7c3aed;
+  --btn-accent-hover: #6d28d9;
   
   --color-p1: #2563eb; /* Blue */
   --color-p2: #059669; /* Green */
@@ -69,6 +72,40 @@ body {
 .subtitle {
   font-size: 0.95rem;
   color: var(--text-muted);
+}
+
+/* Top-Level Algorithm / Module Selection Navigation */
+.main-algo-nav {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+  border-bottom: 2px solid var(--border-light);
+  padding-bottom: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.algo-nav-btn {
+  padding: 0.65rem 1.25rem;
+  font-size: 0.92rem;
+  font-weight: 600;
+  border: 1px solid var(--border-color);
+  background-color: #ffffff;
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.algo-nav-btn:hover {
+  background-color: #f3f4f6;
+  color: var(--text-main);
+}
+
+.algo-nav-btn.active {
+  background-color: var(--btn-primary);
+  border-color: var(--btn-primary);
+  color: #ffffff;
+  box-shadow: 0 1px 3px rgba(37, 99, 235, 0.25);
 }
 
 /* Activity Selection Tabs */
@@ -194,6 +231,12 @@ body {
   box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
 }
 
+.input-hint {
+  font-size: 0.78rem;
+  color: var(--text-light);
+  margin-top: 0.2rem;
+}
+
 /* Controls Grid */
 .control-row {
   display: flex;
@@ -201,6 +244,13 @@ body {
   gap: 1rem;
   flex-wrap: wrap;
   padding-top: 0.5rem;
+}
+
+.disk-controls-grid {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  align-items: flex-start;
 }
 
 .param-group {
@@ -217,13 +267,19 @@ body {
 }
 
 .param-group .text-input {
-  max-width: 180px;
+  max-width: 100%;
 }
 
 .action-buttons {
   display: flex;
   gap: 0.5rem;
   margin-left: auto;
+  flex-wrap: wrap;
+}
+
+.preset-buttons {
+  display: flex;
+  gap: 0.5rem;
   flex-wrap: wrap;
 }
 
@@ -258,6 +314,15 @@ body {
 
 .btn-secondary:hover {
   background-color: #f3f4f6;
+}
+
+.btn-accent {
+  background-color: var(--btn-accent);
+  color: #ffffff;
+}
+
+.btn-accent:hover {
+  background-color: var(--btn-accent-hover);
 }
 
 /* Summary Metrics Grid */
@@ -409,6 +474,40 @@ body {
   margin-bottom: 0.4rem;
 }
 
+/* Disk Scheduling Specific Styles */
+.seek-sequence-banner {
+  background-color: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  color: #166534;
+  padding: 0.65rem 0.9rem;
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  font-weight: 600;
+  margin-bottom: 0.85rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.disk-graph-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--border-light);
+  background-color: #ffffff;
+  padding: 0.75rem;
+  border-radius: 4px;
+}
+
+.disk-svg-container {
+  min-width: 640px;
+  width: 100%;
+}
+
+.disk-svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
   .control-row {
@@ -427,5 +526,9 @@ body {
 
   .action-buttons .btn {
     flex: 1;
+  }
+
+  .disk-controls-grid {
+    flex-direction: column;
   }
 }

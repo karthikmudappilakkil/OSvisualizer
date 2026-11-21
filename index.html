@@ -3,110 +3,248 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Round Robin CPU Scheduling Visualizer</title>
+  <title>Operating Systems Algorithm Visualizer</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <div class="container">
-    <!-- Header -->
+    <!-- Main Header -->
     <header class="header">
-      <h1 class="title">Round Robin CPU Scheduling Visualizer</h1>
-      <p class="subtitle">Operating Systems Practical Activities</p>
+      <h1 class="title">Operating Systems Algorithm Visualizer</h1>
+      <p class="subtitle">Interactive Visualizer for CPU Scheduling (Round Robin, FCFS) & Disk Scheduling (SSTF, FCFS)</p>
     </header>
 
-    <!-- Activity Selection Tabs -->
-    <nav class="activity-nav" aria-label="Activity Selection">
-      <button type="button" class="tab-btn active" id="tabAct1">
-        Activity 1: Without Context Switching Overhead
+    <!-- Top-Level Algorithm / Module Selection Navigation -->
+    <nav class="main-algo-nav" aria-label="Algorithm Categories">
+      <button type="button" class="algo-nav-btn active" id="btnNavRR">
+        CPU: Round Robin
       </button>
-      <button type="button" class="tab-btn" id="tabAct2">
-        Activity 2: With Context Switching Overhead
+      <button type="button" class="algo-nav-btn" id="btnNavCPUFCFS">
+        CPU: FCFS
+      </button>
+      <button type="button" class="algo-nav-btn" id="btnNavDisk">
+        Disk: SSTF & FCFS
       </button>
     </nav>
 
-    <!-- Scenario Notice -->
-    <div class="scenario-banner" id="scenarioBanner">
-      <strong>Scenario:</strong> <span id="scenarioText">Smart Municipal Control Centre (No Context Switching Overhead)</span>
+    <!-- ==================================================================== -->
+    <!-- MODULE 1: ROUND ROBIN CPU SCHEDULING                                  -->
+    <!-- ==================================================================== -->
+    <div id="sectionRR">
+      <!-- Activity Selection Tabs -->
+      <nav class="activity-nav" aria-label="Activity Selection">
+        <button type="button" class="tab-btn active" id="tabAct1">
+          Activity 1: Without Context Switching Overhead
+        </button>
+        <button type="button" class="tab-btn" id="tabAct2">
+          Activity 2: With Context Switching Overhead
+        </button>
+      </nav>
+
+      <!-- Scenario Notice -->
+      <div class="scenario-banner" id="scenarioBanner">
+        <strong>Scenario:</strong> <span id="scenarioText">Smart Municipal Control Centre (No Context Switching Overhead)</span>
+      </div>
+
+      <!-- Error Alert Box -->
+      <div id="errorAlertRR" class="error-alert" style="display: none;" role="alert"></div>
+
+      <!-- Input Section Card -->
+      <section class="card input-card">
+        <div class="card-header">
+          <h2 class="card-title">Round Robin Process Configuration</h2>
+        </div>
+
+        <!-- Editable Process Table -->
+        <div class="table-container">
+          <table class="data-table" id="inputTable">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Process</th>
+                <th style="width: 45%;">Task Description</th>
+                <th style="width: 20%;">Arrival Time (AT) [ms]</th>
+                <th style="width: 20%;">Burst Time (BT) [ms]</th>
+              </tr>
+            </thead>
+            <tbody id="inputTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Parameters and Action Buttons -->
+        <div class="control-row">
+          <div class="param-group">
+            <label for="quantumInput">Time Quantum (TQ) [ms]:</label>
+            <input type="number" id="quantumInput" class="text-input" min="1" step="1" value="2">
+          </div>
+
+          <div class="param-group" id="overheadGroup" style="display: none;">
+            <label for="overheadInput">Context Switching Overhead [ms]:</label>
+            <input type="number" id="overheadInput" class="text-input" min="0" step="1" value="1">
+          </div>
+
+          <div class="action-buttons">
+            <button type="button" class="btn btn-secondary" id="loadDefaultBtn">Load Default Data</button>
+            <button type="button" class="btn btn-primary" id="runSimBtn">Run Simulation</button>
+            <button type="button" class="btn btn-primary" id="compareBtn">Compare Time Quantums</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Results Section -->
+      <section id="resultsSection" class="results-wrapper" style="display: none;">
+        <!-- Single Simulation View -->
+        <div id="singleSimulationView">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title" id="singleGanttHeading">Gantt Chart (Time Quantum = 2 ms)</h2>
+            </div>
+            <div class="gantt-legend" id="singleLegend"></div>
+            <div class="gantt-scroll-container">
+              <div class="gantt-chart" id="singleGanttChart"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Performance Summary Metrics</h2>
+            </div>
+            <div class="metrics-grid" id="summaryMetricsContainer"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Detailed Process Results</h2>
+            </div>
+            <div class="table-container">
+              <table class="data-table" id="resultsTable">
+                <thead>
+                  <tr>
+                    <th>Process</th>
+                    <th>Task Description</th>
+                    <th>Arrival Time (AT)</th>
+                    <th>Burst Time (BT)</th>
+                    <th>Completion Time (CT)</th>
+                    <th>Turnaround Time (TAT)</th>
+                    <th>Waiting Time (WT)</th>
+                    <th>Response Time (RT)</th>
+                  </tr>
+                </thead>
+                <tbody id="resultsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- Comparison View -->
+        <div id="comparisonView" style="display: none;">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title" id="compGanttHeading">Comparative Gantt Charts</h2>
+            </div>
+            <div class="comparison-gantts">
+              <div class="comparison-gantt-block">
+                <h3 class="comparison-subtitle" id="labelCompA">Time Quantum = 2 ms</h3>
+                <div class="gantt-scroll-container">
+                  <div class="gantt-chart" id="compGanttChartA"></div>
+                </div>
+              </div>
+              <div class="comparison-gantt-block">
+                <h3 class="comparison-subtitle" id="labelCompB">Time Quantum = 3 ms</h3>
+                <div class="gantt-scroll-container">
+                  <div class="gantt-chart" id="compGanttChartB"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title" id="compTableHeading">Time Quantum Comparison Table</h2>
+            </div>
+            <div class="table-container">
+              <table class="data-table" id="comparisonTable">
+                <thead>
+                  <tr>
+                    <th>Performance Metric</th>
+                    <th id="thCompColA">TQ = 2 ms</th>
+                    <th id="thCompColB">TQ = 3 ms</th>
+                  </tr>
+                </thead>
+                <tbody id="comparisonTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
 
-    <!-- Error Alert Box -->
-    <div id="errorAlert" class="error-alert" style="display: none;" role="alert"></div>
-
-    <!-- Input Section Card -->
-    <section class="card input-card">
-      <div class="card-header">
-        <h2 class="card-title">Process Configuration</h2>
+    <!-- ==================================================================== -->
+    <!-- MODULE 2: FCFS CPU SCHEDULING                                         -->
+    <!-- ==================================================================== -->
+    <div id="sectionCPUFCFS" style="display: none;">
+      <div class="scenario-banner">
+        <strong>Scenario:</strong> First-Come First-Served (FCFS) Non-Preemptive CPU Scheduling
       </div>
 
-      <!-- Editable Process Table -->
-      <div class="table-container">
-        <table class="data-table" id="inputTable">
-          <thead>
-            <tr>
-              <th style="width: 15%;">Process</th>
-              <th style="width: 45%;">Task Description</th>
-              <th style="width: 20%;">Arrival Time (AT) [ms]</th>
-              <th style="width: 20%;">Burst Time (BT) [ms]</th>
-            </tr>
-          </thead>
-          <tbody id="inputTableBody">
-            <!-- Dynamically populated rows -->
-          </tbody>
-        </table>
-      </div>
+      <div id="errorAlertCPUFCFS" class="error-alert" style="display: none;" role="alert"></div>
 
-      <!-- Parameters and Action Buttons -->
-      <div class="control-row">
-        <div class="param-group">
-          <label for="quantumInput">Time Quantum (TQ) [ms]:</label>
-          <input type="number" id="quantumInput" class="text-input" min="1" step="1" value="2">
+      <section class="card input-card">
+        <div class="card-header">
+          <h2 class="card-title">FCFS Process Configuration</h2>
         </div>
 
-        <div class="param-group" id="overheadGroup" style="display: none;">
-          <label for="overheadInput">Context Switching Overhead [ms]:</label>
-          <input type="number" id="overheadInput" class="text-input" min="0" step="1" value="1">
+        <div class="table-container">
+          <table class="data-table" id="fcfsInputTable">
+            <thead>
+              <tr>
+                <th style="width: 15%;">Process</th>
+                <th style="width: 45%;">Task Description</th>
+                <th style="width: 20%;">Arrival Time (AT) [ms]</th>
+                <th style="width: 20%;">Burst Time (BT) [ms]</th>
+              </tr>
+            </thead>
+            <tbody id="fcfsInputTableBody">
+              <!-- Dynamically populated rows -->
+            </tbody>
+          </table>
         </div>
 
-        <div class="action-buttons">
-          <button type="button" class="btn btn-secondary" id="loadDefaultBtn">Load Default Data</button>
-          <button type="button" class="btn btn-primary" id="runSimBtn">Run Simulation</button>
-          <button type="button" class="btn btn-primary" id="compareBtn">Compare Time Quantums</button>
+        <div class="control-row">
+          <div class="action-buttons" style="margin-left: 0;">
+            <button type="button" class="btn btn-secondary" id="fcfsAddRowBtn">+ Add Process</button>
+            <button type="button" class="btn btn-secondary" id="fcfsLoadDefaultBtn">Load Default Processes</button>
+            <button type="button" class="btn btn-primary" id="fcfsRunBtn">Run FCFS Simulation</button>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- Results Section (hidden until simulation or comparison is run) -->
-    <section id="resultsSection" class="results-wrapper" style="display: none;">
-      <!-- 1. Single Simulation View -->
-      <div id="singleSimulationView">
-        <!-- Gantt Chart Card -->
+      <!-- FCFS Results Section -->
+      <section id="fcfsResultsSection" class="results-wrapper" style="display: none;">
         <div class="card">
           <div class="card-header">
-            <h2 class="card-title" id="singleGanttHeading">Gantt Chart (Time Quantum = 2 ms)</h2>
+            <h2 class="card-title">FCFS CPU Gantt Chart</h2>
           </div>
-          <div class="gantt-legend" id="singleLegend"></div>
+          <div class="gantt-legend" id="fcfsLegend"></div>
           <div class="gantt-scroll-container">
-            <div class="gantt-chart" id="singleGanttChart"></div>
+            <div class="gantt-chart" id="fcfsGanttChart"></div>
           </div>
         </div>
 
-        <!-- Summary Metrics Card -->
         <div class="card">
           <div class="card-header">
-            <h2 class="card-title">Performance Summary Metrics</h2>
+            <h2 class="card-title">FCFS Performance Summary Metrics</h2>
           </div>
-          <div class="metrics-grid" id="summaryMetricsContainer">
-            <!-- Populated via script.js -->
-          </div>
+          <div class="metrics-grid" id="fcfsSummaryMetricsContainer"></div>
         </div>
 
-        <!-- Detailed Process Results Table Card -->
         <div class="card">
           <div class="card-header">
-            <h2 class="card-title">Detailed Process Results</h2>
+            <h2 class="card-title">FCFS Detailed Process Results</h2>
           </div>
           <div class="table-container">
-            <table class="data-table" id="resultsTable">
+            <table class="data-table" id="fcfsResultsTable">
               <thead>
                 <tr>
                   <th>Process</th>
@@ -119,60 +257,162 @@
                   <th>Response Time (RT)</th>
                 </tr>
               </thead>
-              <tbody id="resultsTableBody">
-                <!-- Populated via script.js -->
-              </tbody>
+              <tbody id="fcfsResultsTableBody"></tbody>
             </table>
           </div>
         </div>
+      </section>
+    </div>
+
+    <!-- ==================================================================== -->
+    <!-- MODULE 3: DISK SCHEDULING (SSTF & FCFS)                               -->
+    <!-- ==================================================================== -->
+    <div id="sectionDisk" style="display: none;">
+      <div class="scenario-banner">
+        <strong>Scenario:</strong> Disk Arm Cylinder Scheduling (Track Seeking Algorithms)
       </div>
 
-      <!-- 2. Comparison View -->
-      <div id="comparisonView" style="display: none;">
-        <!-- Stacked Gantt Charts Card -->
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title" id="compGanttHeading">Comparative Gantt Charts</h2>
-          </div>
-          <div class="comparison-gantts">
-            <div class="comparison-gantt-block">
-              <h3 class="comparison-subtitle" id="labelCompA">Time Quantum = 2 ms</h3>
-              <div class="gantt-scroll-container">
-                <div class="gantt-chart" id="compGanttChartA"></div>
-              </div>
-            </div>
+      <div id="errorAlertDisk" class="error-alert" style="display: none;" role="alert"></div>
 
-            <div class="comparison-gantt-block">
-              <h3 class="comparison-subtitle" id="labelCompB">Time Quantum = 3 ms</h3>
-              <div class="gantt-scroll-container">
-                <div class="gantt-chart" id="compGanttChartB"></div>
-              </div>
+      <section class="card input-card">
+        <div class="card-header">
+          <h2 class="card-title">Disk Configuration & Request Queue</h2>
+        </div>
+
+        <div class="disk-controls-grid">
+          <div class="param-group" style="flex: 2; min-width: 280px;">
+            <label for="diskQueueInput">I/O Request Queue (comma-separated cylinder tracks):</label>
+            <input type="text" id="diskQueueInput" class="text-input" value="98, 183, 37, 122, 14, 124, 65, 67" placeholder="e.g. 98, 183, 37, 122, 14, 124, 65, 67">
+            <span class="input-hint">Example: Silberschatz textbook standard sequence</span>
+          </div>
+
+          <div class="param-group" style="min-width: 140px;">
+            <label for="diskHeadInput">Initial Head Position:</label>
+            <input type="number" id="diskHeadInput" class="text-input" min="0" value="53">
+          </div>
+
+          <div class="param-group" style="min-width: 140px;">
+            <label for="diskMaxTrackInput">Max Cylinder (Range 0 - N):</label>
+            <input type="number" id="diskMaxTrackInput" class="text-input" min="1" value="199">
+          </div>
+        </div>
+
+        <div class="control-row" style="margin-top: 1rem;">
+          <div class="preset-buttons">
+            <button type="button" class="btn btn-secondary" id="diskDefaultBtn">Textbook Default (53, [98..])</button>
+            <button type="button" class="btn btn-secondary" id="diskRandomBtn">Generate Random Queue</button>
+          </div>
+
+          <div class="action-buttons">
+            <button type="button" class="btn btn-primary" id="diskRunSSTFBtn">Run SSTF</button>
+            <button type="button" class="btn btn-secondary" id="diskRunFCFSBtn">Run FCFS</button>
+            <button type="button" class="btn btn-accent" id="diskCompareBtn">Compare SSTF vs FCFS</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- Disk Results Section -->
+      <section id="diskResultsSection" class="results-wrapper" style="display: none;">
+        <!-- Single Mode Results (SSTF or FCFS) -->
+        <div id="diskSingleView">
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title" id="diskChartHeading">Disk Head Movement Trajectory</h2>
+            </div>
+            
+            <!-- Seek Sequence Path Banner -->
+            <div class="seek-sequence-banner" id="diskSeekSequence"></div>
+
+            <!-- SVG Line Graph of Head Trajectory -->
+            <div class="disk-graph-wrapper">
+              <div id="diskSvgContainer" class="disk-svg-container"></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title" id="diskMetricsHeading">Disk Seek Performance Metrics</h2>
+            </div>
+            <div class="metrics-grid" id="diskMetricsContainer"></div>
+          </div>
+
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Step-by-Step Seek Calculation Log</h2>
+            </div>
+            <div class="table-container">
+              <table class="data-table" id="diskStepsTable">
+                <thead>
+                  <tr>
+                    <th>Step #</th>
+                    <th>From Track</th>
+                    <th>To Track</th>
+                    <th>Seek Distance (|To - From|)</th>
+                    <th>Cumulative Seek (Cylinders)</th>
+                  </tr>
+                </thead>
+                <tbody id="diskStepsTableBody"></tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        <!-- Side-by-Side Comparison Table Card -->
-        <div class="card">
-          <div class="card-header">
-            <h2 class="card-title" id="compTableHeading">Time Quantum Comparison Table</h2>
+        <!-- Comparison View (SSTF vs FCFS) -->
+        <div id="diskComparisonView" style="display: none;">
+          <!-- Comparative Summary Card -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Comparative Analysis: SSTF vs FCFS</h2>
+            </div>
+            <div class="metrics-grid" id="diskCompMetricsContainer"></div>
           </div>
-          <div class="table-container">
-            <table class="data-table" id="comparisonTable">
-              <thead>
-                <tr>
-                  <th>Performance Metric</th>
-                  <th id="thCompColA">TQ = 2 ms</th>
-                  <th id="thCompColB">TQ = 3 ms</th>
-                </tr>
-              </thead>
-              <tbody id="comparisonTableBody">
-                <!-- Populated via script.js -->
-              </tbody>
-            </table>
+
+          <!-- Stacked Trajectory Charts -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Side-by-Side Trajectory Comparison</h2>
+            </div>
+            <div class="comparison-gantts">
+              <div class="comparison-gantt-block">
+                <h3 class="comparison-subtitle" id="diskCompLabelSSTF">SSTF (Shortest Seek Time First)</h3>
+                <div class="seek-sequence-banner" id="diskCompSeqSSTF"></div>
+                <div class="disk-graph-wrapper">
+                  <div id="diskCompSvgSSTF" class="disk-svg-container"></div>
+                </div>
+              </div>
+
+              <div class="comparison-gantt-block">
+                <h3 class="comparison-subtitle" id="diskCompLabelFCFS">FCFS (First-Come First-Served)</h3>
+                <div class="seek-sequence-banner" id="diskCompSeqFCFS"></div>
+                <div class="disk-graph-wrapper">
+                  <div id="diskCompSvgFCFS" class="disk-svg-container"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Side-by-Side Comparison Table -->
+          <div class="card">
+            <div class="card-header">
+              <h2 class="card-title">Metric-by-Metric Comparison Table</h2>
+            </div>
+            <div class="table-container">
+              <table class="data-table" id="diskCompTable">
+                <thead>
+                  <tr>
+                    <th>Performance Parameter</th>
+                    <th>SSTF</th>
+                    <th>FCFS</th>
+                    <th>Performance Advantage</th>
+                  </tr>
+                </thead>
+                <tbody id="diskCompTableBody"></tbody>
+              </table>
+            </div>
           </div>
         </div>
-      </div>
-    </section>
+      </section>
+    </div>
   </div>
 
   <script src="script.js"></script>
